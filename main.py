@@ -93,3 +93,28 @@ def retrieveVideoInfoAndDownload():
 
         except:
             print('==Error: URL was not found')
+
+
+    print('== Parsing JSON')
+    with open('temp_video.json') as json_file:
+        data = json.load(json_file)
+
+
+
+        for i in data['objects']:
+            try:
+                videoDownloadURL = i['download_url']
+                videoName = i['name']
+                print('Video URL: ' + videoDownloadURL)
+                print('Video Name: ' + videoName)#
+                videoNameBackslashes = videoName.replace(' ', '\ ')
+                print('Downloading video: ' + videoName + '.mp4' + ' from: ' + videoDownloadURL)
+                r = requests.get(videoDownloadURL, stream=True)
+                path = videoName + '.mp4'
+
+                time.sleep(1)
+            except KeyError:
+                print('not found')
+
+
+retrieveVideoInfoAndDownload()
