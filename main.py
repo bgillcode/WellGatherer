@@ -4,7 +4,15 @@ import pychrome
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-
+import requests
+import sys
+import subprocess
+import shlex
+import json
+import urllib.request
+from clint.textui import progress
+import argparse
+import os
 
 
 
@@ -99,7 +107,9 @@ def retrieveVideoInfoAndDownload():
     with open('temp_video.json') as json_file:
         data = json.load(json_file)
 
-
+        print('\n=========================')
+        print('STARTING VIDEO DOWNLOAD')
+        print('==========================')
 
         for i in data['objects']:
             try:
@@ -111,7 +121,12 @@ def retrieveVideoInfoAndDownload():
                 print('Downloading video: ' + videoName + '.mp4' + ' from: ' + videoDownloadURL)
                 r = requests.get(videoDownloadURL, stream=True)
                 path = videoName + '.mp4'
-
+                with open(path, 'wb') as f:
+                    total_length = int(r.headers.get('content-length'))
+                    for chunk in progress.bar(r.iter_content(chunk_size=1024), expected_size=(total_length/1024) + 1):
+                        if chunk:
+                            f.write(chunk)
+                            f.flush()
                 time.sleep(1)
             except KeyError:
                 print('not found')
