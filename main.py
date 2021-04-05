@@ -14,6 +14,13 @@ from clint.textui import progress
 import argparse
 import os
 
+# Initiate the parser
+parser = argparse.ArgumentParser()
+
+# Add long and short argument for the URL
+parser.add_argument("--url", "-u", help="Set URL")
+
+
 
 
 def output_on_start(**kwargs):
