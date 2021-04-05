@@ -33,7 +33,6 @@ if args.url:
     urlInputted = str(args.url)
 
 
-
 def output_on_start(**kwargs):
     gottenOutput = kwargs
 
@@ -59,12 +58,8 @@ def output_on_start(**kwargs):
                 pass
 
 
-
-
 def output_on_end(**kwargs):
     gottenOutput2 = kwargs
-
-
 
 
 def retrieveVideoInfoAndDownload():
