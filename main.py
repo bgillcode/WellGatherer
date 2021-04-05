@@ -20,6 +20,17 @@ parser = argparse.ArgumentParser()
 # Add long and short argument for the URL
 parser.add_argument("--url", "-u", help="Set URL")
 
+# Read arguments from the command line
+args = parser.parse_args()
+
+# Set the argument for what to look for here in the URL
+checkForContent = ""
+
+# Check for --url
+if args.url:
+    if str(args.url).strip().find(checkForContent) != -1:
+        episodeTypeCheck = True
+    urlInputted = str(args.url)
 
 
 
