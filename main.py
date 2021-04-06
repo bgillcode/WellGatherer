@@ -27,6 +27,7 @@ args = parser.parse_args()
 
 # Set the argument for what to look for here in the URL
 checkForContent = ""
+endMedia = 0
 
 # Check for --url
 if args.url:
@@ -38,7 +39,7 @@ if args.url:
 if args.end:
     if str(args.end).strip() != -1:
         try:
-            endPageRange = int(args.end)
+            endMedia = int(args.end)
         except:
             print('Ending given must be a number')
             print('Exiting script, please try again')
@@ -74,87 +75,94 @@ def output_on_end(**kwargs):
     gottenOutput2 = kwargs
 
 
-def retrieveVideoInfoAndDownload():
-    options = webdriver.ChromeOptions()
-    options.add_argument("--remote-debugging-port=8000")
-    options.add_argument("--headless")
-    options.add_argument("--log-level=3")
+if endPageRange != 0:
 
-    print('\n=================================================================================')
-    print('Waiting for video information to be loaded, this process can take up to 1 minute.')
-    print('=================================================================================')
 
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
-    driver.implicitly_wait(10) # seconds
-    driver.find_elements_by_class_name("detailed-info")
 
-    dev_tools = pychrome.Browser(url="http://localhost:8000")
-    tab = dev_tools.list_tab()[0]
-    tab.start()
+    def retrieveVideoInfoAndDownload():
+        options = webdriver.ChromeOptions()
+        options.add_argument("--remote-debugging-port=8000")
+        options.add_argument("--headless")
+        options.add_argument("--log-level=3")
 
-    print('\n=================================================================================')
-    print('Waiting for video information to be loaded, this process can take up to 1 minute.')
-    print('=================================================================================')
+        print('\n=================================================================================')
+        print('Waiting for video information to be loaded, this process can take up to 1 minute.')
+        print('=================================================================================')
 
-    driver.get(urlInputted)
+        driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+        driver.implicitly_wait(10) # seconds
+        driver.find_elements_by_class_name("detailed-info")
 
-    tab.call_method("Network.emulateNetworkConditions",
-                    offline=False,
-                    latency=100,
-                    downloadThroughput=9375,
-                    uploadThroughput=3125,
-                    connectionType="cellular3g")
+        dev_tools = pychrome.Browser(url="http://localhost:8000")
+        tab = dev_tools.list_tab()[0]
+        tab.start()
 
-    tab.call_method("Network.enable", _timeout=20)
-    ss2 = tab.set_listener("Network.requestWillBeSent", output_on_start)
-    ss = tab.set_listener("Network.responseReceived", output_on_end)
+        print('\n=================================================================================')
+        print('Waiting for video information to be loaded, this process can take up to 1 minute.')
+        print('=================================================================================')
 
-    try:
         driver.get(urlInputted)
-        time.sleep(15)
-    finally:
-        driver.quit()
 
-    with open('a.txt', 'r') as f:
+        tab.call_method("Network.emulateNetworkConditions",
+                        offline=False,
+                        latency=100,
+                        downloadThroughput=9375,
+                        uploadThroughput=3125,
+                        connectionType="cellular3g")
+
+        tab.call_method("Network.enable", _timeout=20)
+        ss2 = tab.set_listener("Network.requestWillBeSent", output_on_start)
+        ss = tab.set_listener("Network.responseReceived", output_on_end)
+
         try:
-            newURLObtained = f.read()
-            r = requests.get(newURLObtained)
-            with open(r'' + 'temp_video' + '.json', 'wb') as g:
-                g.write(r.content)
-            print('JSON written')
-            time.sleep(2.4)
+            driver.get(urlInputted)
+            time.sleep(15)
+        finally:
+            driver.quit()
 
-        except:
-            print('==Error: URL was not found')
-
-
-    print('== Parsing JSON')
-    with open('temp_video.json') as json_file:
-        data = json.load(json_file)
-
-        print('\n=========================')
-        print('STARTING VIDEO DOWNLOAD')
-        print('==========================')
-
-        for i in data['objects']:
+        with open('a.txt', 'r') as f:
             try:
-                videoDownloadURL = i['download_url']
-                videoName = i['name']
-                print('Video URL: ' + videoDownloadURL)
-                print('Video Name: ' + videoName)#
-                videoNameBackslashes = videoName.replace(' ', '\ ')
-                print('Downloading video: ' + videoName + '.mp4' + ' from: ' + videoDownloadURL)
-                r = requests.get(videoDownloadURL, stream=True)
-                path = videoName + '.mp4'
-                with open(path, 'wb') as f:
-                    total_length = int(r.headers.get('content-length'))
-                    for chunk in progress.bar(r.iter_content(chunk_size=1024), expected_size=(total_length/1024) + 1):
-                        if chunk:
-                            f.write(chunk)
-                            f.flush()
-                time.sleep(1)
-            except KeyError:
-                print('not found')
+                newURLObtained = f.read()
+                r = requests.get(newURLObtained)
+                with open(r'' + 'temp_video' + '.json', 'wb') as g:
+                    g.write(r.content)
+                print('JSON written')
+                time.sleep(2.4)
+
+            except:
+                print('==Error: URL was not found')
 
 
-retrieveVideoInfoAndDownload()
+        print('== Parsing JSON')
+        with open('temp_video.json') as json_file:
+            data = json.load(json_file)
+
+            print('\n=========================')
+            print('STARTING VIDEO DOWNLOAD')
+            print('==========================')
+
+            for i in data['objects']:
+                try:
+                    videoDownloadURL = i['download_url']
+                    videoName = i['name']
+                    print('Video URL: ' + videoDownloadURL)
+                    print('Video Name: ' + videoName)#
+                    videoNameBackslashes = videoName.replace(' ', '\ ')
+                    print('Downloading video: ' + videoName + '.mp4' + ' from: ' + videoDownloadURL)
+                    r = requests.get(videoDownloadURL, stream=True)
+                    path = videoName + '.mp4'
+                    with open(path, 'wb') as f:
+                        total_length = int(r.headers.get('content-length'))
+                        for chunk in progress.bar(r.iter_content(chunk_size=1024), expected_size=(total_length/1024) + 1):
+                            if chunk:
+                                f.write(chunk)
+                                f.flush()
+                    time.sleep(1)
+                except KeyError:
+                    print('not found')
+
+
+    retrieveVideoInfoAndDownload()
+
+else:
+    # To do
