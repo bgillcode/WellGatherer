@@ -19,6 +19,8 @@ parser = argparse.ArgumentParser()
 
 # Add long and short argument for the URL
 parser.add_argument("--url", "-u", help="Set URL")
+parser.add_argument("--end", "-e", help="Will loop through all relevant media on the page and retrieve it up until the selected amount (e.g. -e 5)")
+
 
 # Read arguments from the command line
 args = parser.parse_args()
