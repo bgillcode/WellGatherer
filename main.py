@@ -34,6 +34,16 @@ if args.url:
         episodeTypeCheck = True
     urlInputted = str(args.url)
 
+# Check for --end (of media)
+if args.end:
+    if str(args.end).strip() != -1:
+        try:
+            endPageRange = int(args.end)
+        except:
+            print('Ending given must be a number')
+            print('Exiting script, please try again')
+            sys.exit()
+
 
 def output_on_start(**kwargs):
     gottenOutput = kwargs
